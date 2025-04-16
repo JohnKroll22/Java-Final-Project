@@ -33,5 +33,9 @@ public class Card {
     public String toString(){
         return getCardName() + "(Value: " + value + ")";
     }
+
+    public String getImagePath(){
+        return "cards/" + rank + "_of_" + suit + ".png";
+    }
     }
 
