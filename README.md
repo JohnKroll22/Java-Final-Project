@@ -10,3 +10,5 @@ Rules:
 5. The dealer starts by flipping their face down card face up. The dealer now must Hit until they have a minimum of 17 points, and once they get 17 or more points, they are forced to Stand. They don't make any actual decisions.
 6. After the dealer Stands, a winner is decided based on their totals.
 7. The game is over.
+
+In BlackJackMain.java, we made it so that you can play with multiple players, but our visual game (BlackjackGUI) is single-player (just between the dealer and the user).
