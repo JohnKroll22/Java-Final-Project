@@ -1,0 +1,215 @@
+import java.awt.*;
+import javax.swing.*;
+
+public class BlackjackGUI extends JFrame {
+    private JPanel dealerPanel;
+    private JPanel playerPanel;
+    private JLabel dealerValueLabel;
+    private JLabel playerValueLabel;
+    private JButton hitButton, standButton, replayButton, endButton;
+
+    private Deck deck;
+    private Player2 player;
+    private Dealer2 dealer;
+
+    private JLabel dealerCardBackLabel;
+
+    public BlackjackGUI() {
+        setTitle("Blackjack");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(900, 600);
+        setLayout(new BorderLayout());
+
+        // ========== Dealer Section ==========
+        JPanel dealerContainer = new JPanel(new BorderLayout());
+        dealerPanel = new JPanel(new FlowLayout());
+        dealerValueLabel = new JLabel("Value: ?");
+        dealerValueLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        dealerContainer.setBorder(BorderFactory.createTitledBorder("Dealer"));
+
+        dealerContainer.add(dealerValueLabel, BorderLayout.WEST);
+        dealerContainer.add(dealerPanel, BorderLayout.CENTER);
+        add(dealerContainer, BorderLayout.NORTH);
+
+        // ========== Player Section ==========
+        JPanel playerContainer = new JPanel(new BorderLayout());
+        playerPanel = new JPanel(new FlowLayout());
+        playerValueLabel = new JLabel("Value: ?");
+        playerValueLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        playerContainer.setBorder(BorderFactory.createTitledBorder("Player"));
+
+        playerContainer.add(playerValueLabel, BorderLayout.WEST);
+        playerContainer.add(playerPanel, BorderLayout.CENTER);
+        add(playerContainer, BorderLayout.CENTER);
+
+        // ========== Button Section ==========
+        JPanel buttonPanel = new JPanel();
+        hitButton = new JButton("Hit");
+        standButton = new JButton("Stand");
+        replayButton = new JButton("Replay");
+        endButton = new JButton("End Game");
+
+        buttonPanel.add(hitButton);
+        buttonPanel.add(standButton);
+        buttonPanel.add(replayButton);
+        buttonPanel.add(endButton);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        // Button listeners
+        hitButton.addActionListener(e -> playerHits());
+        standButton.addActionListener(e -> playerStands());
+        replayButton.addActionListener(e -> resetGame());
+        endButton.addActionListener(e -> System.exit(0));
+
+        // Start first game
+        startNewGame();
+    }
+
+    private void startNewGame() {
+        dealerPanel.removeAll();
+        playerPanel.removeAll();
+
+        deck = new Deck();
+        deck.shuffle();
+        player = new Player2(deck.dealHand(2));
+        dealer = new Dealer2(deck.dealHand(2));
+
+        showDealerInitial();
+        showPlayerHand();
+
+        int playerSum = player.getSum();
+        updatePlayerValue();
+        updateDealerValue(false);
+
+        if (playerSum == 21) {
+            showDealerHand();
+            updateDealerValue(true);
+            JOptionPane.showMessageDialog(this, "Blackjack! Player wins!");
+            endGame();
+            return;
+        }
+
+        hitButton.setEnabled(true);
+        standButton.setEnabled(true);
+
+        revalidate();
+        repaint();
+    }
+
+    private void resetGame() {
+        startNewGame();
+    }
+
+    private void showDealerInitial() {
+        dealerPanel.removeAll();
+
+        Card first = dealer.getHand().get(0);
+        dealerPanel.add(createCardLabel(first));
+
+        ImageIcon backIcon = new ImageIcon("cards/back.png");
+        Image backImg = backIcon.getImage().getScaledInstance(100, 140, Image.SCALE_SMOOTH);
+        dealerCardBackLabel = new JLabel(new ImageIcon(backImg));
+        dealerPanel.add(dealerCardBackLabel);
+
+        updateDealerValue(false);
+    }
+
+    private void showDealerHand() {
+        dealerPanel.removeAll();
+        for (Card card : dealer.getHand()) {
+            dealerPanel.add(createCardLabel(card));
+        }
+        updateDealerValue(true);
+    }
+
+    private void showPlayerHand() {
+        playerPanel.removeAll();
+        for (Card card : player.getHand()) {
+            playerPanel.add(createCardLabel(card));
+        }
+        updatePlayerValue();
+    }
+
+    private void playerHits() {
+        Card newCard = deck.drawCard();
+        player.addCard(newCard);
+        playerPanel.add(createCardLabel(newCard));
+        updatePlayerValue();
+        revalidate();
+        repaint();
+
+        if (player.getSum() > 21) {
+            showDealerHand();
+            updateDealerValue(true);
+            JOptionPane.showMessageDialog(this, "Player busts! Dealer wins.");
+            endGame();
+        }
+    }
+
+    private void playerStands() {
+        hitButton.setEnabled(false);
+        standButton.setEnabled(false);
+
+        showDealerHand();
+
+        dealer.setIsFinalTurn();
+        while (dealer.getSum() < 17) {
+            Card newCard = deck.drawCard();
+            dealer.addCard(newCard);
+            showDealerHand();
+
+            try {
+                Thread.sleep(700);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        int playerSum = player.getSum();
+        int dealerSum = dealer.getSum();
+        String result;
+
+        if (dealerSum > 21 || playerSum > dealerSum) {
+            result = "Player wins!";
+        } else if (dealerSum > playerSum) {
+            result = "Dealer wins!";
+        } else {
+            result = "It's a tie!";
+        }
+
+        JOptionPane.showMessageDialog(this, result);
+        endGame();
+    }
+
+    private JLabel createCardLabel(Card card) {
+        String imagePath = card.getImagePath();
+        ImageIcon cardImage = new ImageIcon(imagePath);
+        Image scaledImage = cardImage.getImage().getScaledInstance(100, 140, Image.SCALE_SMOOTH);
+        return new JLabel(new ImageIcon(scaledImage));
+    }
+
+    private void updatePlayerValue() {
+        playerValueLabel.setText("Value: " + player.getSum());
+    }
+
+    private void updateDealerValue(boolean showFullValue) {
+        if (showFullValue) {
+            dealerValueLabel.setText("Value: " + dealer.getSum());
+        } else {
+            int visible = dealer.getHand().get(0).getValue();
+            dealerValueLabel.setText("Value: " + visible + " + ?");
+        }
+    }
+
+    private void endGame() {
+        hitButton.setEnabled(false);
+        standButton.setEnabled(false);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            BlackjackGUI gui = new BlackjackGUI();
+            gui.setVisible(true);
+        });
+    }
+}
