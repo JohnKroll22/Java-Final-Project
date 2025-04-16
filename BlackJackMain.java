@@ -36,7 +36,7 @@ public class BlackJackMain {
                     System.out.println("Sum: " + current.getSum());
                 }
                 if (current.getSum() > 21) {
-                    System.out.print("Bust!");
+                    System.out.println("Bust!");
                     break;
                 }
             } while(next.equals("hit"));
