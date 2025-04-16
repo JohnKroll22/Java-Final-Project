@@ -2,7 +2,8 @@ import java.util.*;
 
 public class Deck {
     private final ArrayList<Card> cards;
-    private int currentCardIndex;
+    //private int currentCardIndex;
+    public char[] size;
 
     public Deck(){
         cards = new ArrayList<>();
@@ -14,20 +15,18 @@ public class Deck {
                 cards.add(new Card(rank, suit));
             }
         }
-        currentCardIndex = 0;
+        //currentCardIndex = 0;
     }
 
     public void shuffle(){
         Collections.shuffle(cards);
-        currentCardIndex = 0;
+        //currentCardIndex = 0;
     }
 
     public Card drawCard(){
-        if(currentCardIndex<cards.size()){
-            Card drawnCard = cards.get(currentCardIndex++);
-            cards.remove(currentCardIndex);
-            return drawnCard;
-        }
+       if(!cards.isEmpty()){
+            return cards.remove(0);
+       }
         else{
             return null;
         }
@@ -55,7 +54,7 @@ public class Deck {
                 cards.add(new Card(rank, suit));
             }
         }
-        currentCardIndex = 0;
+        //currentCardIndex = 0;
         Collections.shuffle(cards);
     }
 
@@ -74,6 +73,12 @@ public class Deck {
             aceCount--;
         }
         return total;
+    }
+    public void printDeck(){
+        System.out.println("Remaining Cards in the Deck: ");
+        for(Card card: cards){
+            System.out.println(card);
+        }
     }
 
     
