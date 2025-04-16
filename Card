@@ -1,0 +1,37 @@
+public class Card {
+    final String rank;
+    final String suit;
+    final int value;
+
+    public Card(String rank, String suit){
+        this.rank = rank;
+        this.suit = suit;
+        this.value = assignValue(rank);
+    }
+    
+    private int assignValue(String rank){
+        return switch (rank) {
+            case ("Ace") -> 11;
+            case ("Jack"), ("Queen"), ("King") -> 10;
+            default -> Integer.parseInt(rank);
+        };
+
+    }
+    public int getValue(){
+        return this.value;
+    }
+    public String getRank(){
+        return this.rank;
+    }
+    public String getSuit(){
+        return this.suit;
+    }
+    public String getCardName(){
+        return rank + " of " + suit;
+    }
+    @Override
+    public String toString(){
+        return getCardName() + "(Value: " + value + ")";
+    }
+    }
+
