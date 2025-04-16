@@ -6,7 +6,7 @@ public class Player {
     private boolean moreThan21 = false;
     private int sum;
     private boolean endOfTurn = false;
-    private int balance = 200;
+    private int balance;
     private int bet;
     public Player(ArrayList<Card> hand) {
         this.hand = hand;
@@ -28,6 +28,9 @@ public class Player {
     }
     public int getBet() {
         return this.bet;
+    }
+    public void setBalance(int balance) {
+        this.balance = balance;
     }
     public int getBalance() {
         return this.balance;
