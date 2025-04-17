@@ -35,6 +35,9 @@ public class Player {
     public int getBalance() {
         return this.balance;
     }
+    public void addToBalance(int num) {
+        this.balance += num;
+    }
     public void showHand() {
         for (Card card: hand) {
             System.out.print(card.toString() + " ");
