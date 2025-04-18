@@ -1,31 +1,37 @@
 import java.awt.*;
 import javax.swing.*;
 
-public class BlackjackGUI extends JFrame {
+public class BlackJackGUI extends JFrame {
     private JPanel dealerPanel;
     private JPanel playerPanel;
     private JLabel dealerValueLabel;
     private JLabel playerValueLabel;
+    //private JLabel TotalGamePlayed;
     private JButton hitButton, standButton, replayButton, endButton;
 
     private Deck deck;
-    private Player2 player;
-    private Dealer2 dealer;
+    private Player player;
+    private Dealer dealer;
+    
+    private int totalGame = 0;
+    private int winGame = 0;
 
     private JLabel dealerCardBackLabel;
 
-    public BlackjackGUI() {
+    public BlackJackGUI() {
         setTitle("Blackjack");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(900, 600);
         setLayout(new BorderLayout());
 
+        
         // ========== Dealer Section ==========
         JPanel dealerContainer = new JPanel(new BorderLayout());
         dealerPanel = new JPanel(new FlowLayout());
         dealerValueLabel = new JLabel("Value: ?");
         dealerValueLabel.setFont(new Font("Arial", Font.BOLD, 16));
         dealerContainer.setBorder(BorderFactory.createTitledBorder("Dealer"));
+        dealerContainer.setBackground(new Color (53,101,77));
 
         dealerContainer.add(dealerValueLabel, BorderLayout.WEST);
         dealerContainer.add(dealerPanel, BorderLayout.CENTER);
@@ -37,9 +43,11 @@ public class BlackjackGUI extends JFrame {
         playerValueLabel = new JLabel("Value: ?");
         playerValueLabel.setFont(new Font("Arial", Font.BOLD, 16));
         playerContainer.setBorder(BorderFactory.createTitledBorder("Player"));
-
+        playerContainer.setBackground(new Color (53,101,77));
+        
         playerContainer.add(playerValueLabel, BorderLayout.WEST);
         playerContainer.add(playerPanel, BorderLayout.CENTER);
+        //playerContainer.add("Total Game: ", BorderLayout.WEST);
         add(playerContainer, BorderLayout.CENTER);
 
         // ========== Button Section ==========
@@ -66,13 +74,16 @@ public class BlackjackGUI extends JFrame {
     }
 
     private void startNewGame() {
+    	
+    	totalGame++;
+    	
         dealerPanel.removeAll();
         playerPanel.removeAll();
 
         deck = new Deck();
         deck.shuffle();
-        player = new Player2(deck.dealHand(2));
-        dealer = new Dealer2(deck.dealHand(2));
+        player = new Player (deck.dealHand(2));
+        dealer = new Dealer (deck.dealHand(2));
 
         showDealerInitial();
         showPlayerHand();
@@ -84,7 +95,8 @@ public class BlackjackGUI extends JFrame {
         if (playerSum == 21) {
             showDealerHand();
             updateDealerValue(true);
-            JOptionPane.showMessageDialog(this, "Blackjack! Player wins!");
+            winGame++;
+            JOptionPane.showMessageDialog(this, "Blackjack! Player wins!\n" + "Win percentage: " + ((double) winGame/ totalGame * 100) + "%");
             endGame();
             return;
         }
@@ -106,11 +118,17 @@ public class BlackjackGUI extends JFrame {
         Card first = dealer.getHand().get(0);
         dealerPanel.add(createCardLabel(first));
 
-        ImageIcon backIcon = new ImageIcon("cards/back.png");
+        
+        ImageIcon backIcon = new ImageIcon(getClass().getResource("./cards/back.png"));
+        //ImageIcon backIcon = new ImageIcon("drawing/src/BlackJack/cards/back.png");
+        //System.out.println (backIcon);
+        
         Image backImg = backIcon.getImage().getScaledInstance(100, 140, Image.SCALE_SMOOTH);
         dealerCardBackLabel = new JLabel(new ImageIcon(backImg));
+        dealerPanel.setBackground(new Color (53,101,77));
         dealerPanel.add(dealerCardBackLabel);
-
+        
+        
         updateDealerValue(false);
     }
 
@@ -124,6 +142,7 @@ public class BlackjackGUI extends JFrame {
 
     private void showPlayerHand() {
         playerPanel.removeAll();
+        playerPanel.setBackground(new Color (53,101,77));
         for (Card card : player.getHand()) {
             playerPanel.add(createCardLabel(card));
         }
@@ -137,11 +156,20 @@ public class BlackjackGUI extends JFrame {
         updatePlayerValue();
         revalidate();
         repaint();
+        
+        if (player.getSum() == 21) {
+            showDealerHand();
+            updateDealerValue(true);
+            JOptionPane.showMessageDialog(this, "Blackjack! Player wins!\n" + "Win percentage: " + ((double) winGame/ totalGame * 100) + "%");
+            winGame ++;
+            endGame();
+            return;
+        }
 
         if (player.getSum() > 21) {
             showDealerHand();
             updateDealerValue(true);
-            JOptionPane.showMessageDialog(this, "Player busts! Dealer wins.");
+            JOptionPane.showMessageDialog(this, "Player busts! Dealer wins.\n" + "Win percentage: " + ((double) winGame/ totalGame * 100) + "%");
             endGame();
         }
     }
@@ -171,25 +199,33 @@ public class BlackjackGUI extends JFrame {
 
         if (dealerSum > 21 || playerSum > dealerSum) {
             result = "Player wins!";
+            winGame++;
         } else if (dealerSum > playerSum) {
             result = "Dealer wins!";
         } else {
             result = "It's a tie!";
         }
 
-        JOptionPane.showMessageDialog(this, result);
+        JOptionPane.showMessageDialog(this, result + "\nWin percentage: " + ((double) winGame/ totalGame * 100) + "%");
         endGame();
     }
 
     private JLabel createCardLabel(Card card) {
         String imagePath = card.getImagePath();
-        ImageIcon cardImage = new ImageIcon(imagePath);
+        ImageIcon cardImage = new ImageIcon(getClass().getResource(imagePath));
         Image scaledImage = cardImage.getImage().getScaledInstance(100, 140, Image.SCALE_SMOOTH);
         return new JLabel(new ImageIcon(scaledImage));
     }
 
     private void updatePlayerValue() {
         playerValueLabel.setText("Value: " + player.getSum());
+        
+        playerValueLabel.setText("<html>" +playerValueLabel.getText() + "<br/><br/>" + "Total Game: " + totalGame + "<html>" +
+        							"<br/><html>Wins: " + winGame + "<html>");
+        
+        //playerPanel.add("\nTotal Game: " + totalGame, playerValueLabel);
+        //playerValueLabel.setText("\nWins: " + winGame);
+        //playerValueLabel.
     }
 
     private void updateDealerValue(boolean showFullValue) {
@@ -204,11 +240,13 @@ public class BlackjackGUI extends JFrame {
     private void endGame() {
         hitButton.setEnabled(false);
         standButton.setEnabled(false);
+        
+        //JOptionPane.showMessageDialog(this, "Win percentage: " + ((double) winGame/ totalGame * 100) + "%");
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            BlackjackGUI gui = new BlackjackGUI();
+            BlackJackGUI gui = new BlackJackGUI();
             gui.setVisible(true);
         });
     }
