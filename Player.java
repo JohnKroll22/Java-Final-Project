@@ -17,8 +17,26 @@ public class Player {
         this.sum += e.getValue();
     }
     public int getSum() {
-        return this.sum;
+        int sum = 0;
+        int aceCount = 0;
+    
+        for (Card card : hand) {
+            int value = card.getValue();
+            if (value == 11) {  // If Ace (assuming you return 11 for Ace)
+                aceCount++;
+            }
+            sum += value;
+        }
+    
+        // Adjust Ace value from 11 to 1 if sum is over 21
+        while (sum > 21 && aceCount > 0) {
+            sum -= 10;  // Count one Ace as 1 instead of 11
+            aceCount--;
+        }
+    
+        return sum;
     }
+    
     public ArrayList<Card> getHand() {
         return this.hand;
     }
