@@ -17,6 +17,12 @@ public class BlackJackGUI extends JFrame {
     private int winGame = 0;
 
     private JLabel dealerCardBackLabel;
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            BlackJackGUI gui = new BlackJackGUI();
+            gui.setVisible(true);
+        });
+    }
 
     public BlackJackGUI() {
         setTitle("Blackjack");
@@ -74,8 +80,7 @@ public class BlackJackGUI extends JFrame {
     }
 
     private void startNewGame() {
-    	
-    	totalGame++;
+    	//totalGame++;
     	
         dealerPanel.removeAll();
         playerPanel.removeAll();
@@ -95,10 +100,19 @@ public class BlackJackGUI extends JFrame {
         if (playerSum == 21) {
             showDealerHand();
             updateDealerValue(true);
+            
+            if(dealer.getSum() == 21){
+                JOptionPane.showMessageDialog(this, "Push!");
+                totalGame++;
+            }
+            else{
             winGame++;
+            totalGame++;
             JOptionPane.showMessageDialog(this, "Blackjack! Player wins!\n" + "Win percentage: " + ((double) winGame/ totalGame * 100) + "%");
             endGame();
             return;
+            
+            }
         }
 
         hitButton.setEnabled(true);
@@ -160,15 +174,29 @@ public class BlackJackGUI extends JFrame {
         if (player.getSum() == 21) {
             showDealerHand();
             updateDealerValue(true);
-            JOptionPane.showMessageDialog(this, "Blackjack! Player wins!\n" + "Win percentage: " + ((double) winGame/ totalGame * 100) + "%");
-            winGame ++;
+            dealer.setIsFinalTurn();
+            while (dealer.getSum() < 17) {
+                Card newCard1 = deck.drawCard();
+                dealer.addCard(newCard1);
+                showDealerHand();
+            }    
+            if(dealer.getSum() == 21){
+                JOptionPane.showMessageDialog(this, "Push!");
+                totalGame++;
+            }
+            else{
+                totalGame++;
+                winGame ++;
+            JOptionPane.showMessageDialog(this, "Player wins!\n" + "Win percentage: " + ((double) winGame/ totalGame * 100) + "%");
             endGame();
             return;
+            }
         }
 
         if (player.getSum() > 21) {
             showDealerHand();
             updateDealerValue(true);
+            totalGame++;
             JOptionPane.showMessageDialog(this, "Player busts! Dealer wins.\n" + "Win percentage: " + ((double) winGame/ totalGame * 100) + "%");
             endGame();
         }
@@ -200,10 +228,13 @@ public class BlackJackGUI extends JFrame {
         if (dealerSum > 21 || playerSum > dealerSum) {
             result = "Player wins!";
             winGame++;
+            totalGame++;
         } else if (dealerSum > playerSum) {
             result = "Dealer wins!";
+            totalGame++;
         } else {
             result = "It's a tie!";
+            totalGame++;
         }
 
         JOptionPane.showMessageDialog(this, result + "\nWin percentage: " + ((double) winGame/ totalGame * 100) + "%");
@@ -244,10 +275,4 @@ public class BlackJackGUI extends JFrame {
         //JOptionPane.showMessageDialog(this, "Win percentage: " + ((double) winGame/ totalGame * 100) + "%");
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            BlackJackGUI gui = new BlackJackGUI();
-            gui.setVisible(true);
-        });
-    }
 }
