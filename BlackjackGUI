@@ -213,12 +213,13 @@ public class BlackJackGUI extends JFrame {
             Card newCard = deck.drawCard();
             dealer.addCard(newCard);
             showDealerHand();
-
+/* 
             try {
                 Thread.sleep(700);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+                */
         }
 
         int playerSum = player.getSum();
